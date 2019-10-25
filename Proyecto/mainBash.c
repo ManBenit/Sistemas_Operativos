@@ -17,7 +17,7 @@ Salida: Ejecución de las funciones de cada comando utilizando los temas vistos 
 
 int main(){
   char comando[100];
-
+  
   while(strcmp(comando, "exit")!=0){
     printf("mini-bash>");
     scanf("%s", comando);
