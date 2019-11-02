@@ -14,15 +14,20 @@ Salida: Ejecución de las funciones de cada comando utilizando los temas vistos 
 
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
+
+
+
+void ejecutarComando(char comando[]){
+    system(comando);
+}
 
 int main(){
   char comando[100];
-  printf("HICE ESTE CAMBIO\n");
   while(strcmp(comando, "exit")!=0){
     printf("mini-bash>");
-    scanf("%s", comando);
+    fgets(comando,100,stdin);
+    ejecutarComando(comando);
   }
   return 0;
-  //ESTO ES UNA  PRUEBA DE MOLINA
-  //PRUEBA DE BENITEZ ALV :V
 }
