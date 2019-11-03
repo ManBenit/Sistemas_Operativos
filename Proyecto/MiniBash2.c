@@ -15,6 +15,7 @@ Salida: Ejecución de las funciones de cada comando utilizando los temas vistos 
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 void limpiarBuffer(){
   int c;
@@ -58,6 +59,7 @@ void separarParametros(char comando[],char arr[][10]){
     int i=0,indice=0;
     char cadena[50];
     char s[2];
+    limpiarCadena(cadena);
     while(i<lenght){
       if(comando[i]==' ' || comando[i]=='\n' ){
         limpiarCadena(arr[i]);
@@ -78,12 +80,12 @@ void ejecutarComando(int n, char comando[]){
   char rutaComando[50];
   limpiarCadena(rutaComando);
   separarParametros(comando,arr);
-  strcpy(arr[n-1],"NULL");
-  strcpy(rutaComando,"which ");//ruta comando="which"
-  strcat(rutaComando,arr[0]);// rutaComando="which nombrecomando"
-  strcat(rutaComando,">> resultado");// se manda la ruta al archivo resultado
-  system(rutaComando);
-
+  //vfork(): copia el proceso, continua en la copia y
+  //y cuando termina su ejecución continua el proceso principal
+  if(!vfork()){
+    int execute=execl("/usr/bin/which","which",arr[0],">","resultado",NULL);
+    perror("\nFallo en la ejecución de exec\n");
+  }
 }
 
 int main(){
@@ -91,6 +93,7 @@ int main(){
   system("clear");
   limpiarCadena(comando);
   while(strcmp(comando, "exit")!=0){
+    printf("\n");
     printf("mini-bash>");
     fgets(comando,30,stdin);
     int tamanio=contarParametros(comando)+2;
