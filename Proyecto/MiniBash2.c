@@ -219,13 +219,16 @@ void ejecutarComando(char comando[]){
   }else{
         //comando simple>redireccion
     if (tuberia==0 && redireccion==1 && ingreso==1) {
-
+      printf("HOLA REDICRECCION\n");
       if(!vfork()){
         lista miLista;
         Initialize(&miLista);
         int pos=separarRedireccion(arr,&miLista)+1;
-        char *punteroCadena[Size(&miLista)];
+        int n=Size(&miLista)+1;
+        char *punteroCadena[n];
         listaToPointer(&miLista,punteroCadena);
+        punteroCadena[n-1]=NULL;
+        printf("ARCHIVO %s\n",arr[pos-1]);
         mandarRutaComandoaArchivo(arr[pos]);
         int execute=execvp(arr[0],punteroCadena);
       }
