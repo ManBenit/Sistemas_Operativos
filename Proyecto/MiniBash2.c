@@ -19,9 +19,11 @@ Salida: Ejecución de las funciones de cada comando utilizando los temas vistos 
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include "TADListaDL.h"
 
 int redireccion=0; //0 si el comando no tiene >
 int tuberia=0; // 0 si el comano no tiene |
+int ingreso=0; // 0 si el comando no tiene <
 int tamanio=0; //cantidad de elementos del arreglo para ejecutar exec
 
 void limpiarBuffer(){
@@ -61,7 +63,7 @@ int contarParametros(char comando[]){
 
 }
 
-void separarParametros(char comando[],char arr[][10]){
+void separarParametros(char comando[],char arr[][100]){
     int lenght=strlen(comando);
     int i=0,indice=0;
     char cadena[50];
@@ -85,19 +87,27 @@ void analizarComando(char comando[]) {
   int i=0;
   while (i<strlen(comando)) {
       if(comando[i]=='>'){
-          redireccion=1;
+          redireccion++;;
       }else{
         if(comando[i]=='|'){
-          tuberia=1;
+          tuberia++;
+        }else{
+          if(comando[i]=='<'){
+            ingreso++;
+          }
         }
       }
   }
 }
-
-void mandarRutaComandoaArchivo(){
-	int copia=dup(1);
-  int fd=open("resultado.txt",O_WRONLY | O_CREAT,0600);
-	printf("COPIA %d FD %d",copia,fd);
+void sobreescribirArchivo(){
+  FILE *archivo;
+  archivo=fopen("resultado.txt","w+");
+  fputs(" ",archivo);
+  fclose(archivo);
+}
+void mandarRutaComandoaArchivo(char archivo[]){
+  sobreescribirArchivo();
+  int fd=open(archivo,O_WRONLY | O_CREAT,0600);
   if(fd==-1){
     perror("\nfallo en open\n");
     exit(-1);
@@ -117,18 +127,15 @@ void mandarRutaComandoaArchivo(){
 
 void copiarRutaEjecutable(char rutaComando[]){
   int fd;
+  int numberBytes;
   char c;
   char s[2];
+  char cadena[50];
+  limpiarCadena(cadena);
   fd=open("resultado.txt",O_RDONLY);
-  printf("fd %d\n",fd);
   if(fd!=-1){
-	printf("ENTRA \n");
-      while(read(fd,&c,sizeof(c)!=0)){
-	printf("HOLA\n");
-        s[0]=c;
-        s[1]='\0';
-        strcat(rutaComando,s);
-	printf("%c H\n",c);
+      while((numberBytes=read(fd,&cadena,sizeof(char)))>0){
+        strcat(rutaComando,cadena);
       }
       close(fd);
   }else{
@@ -136,72 +143,109 @@ void copiarRutaEjecutable(char rutaComando[]){
   }
 }
 
-void castToPointer(char arr[][10],char *punteroCadena[],int n){
+/*
+  int separarRedireccion(char arr[][100],lista *l){
+
+  si arr contiene n cadenas, devuelve la posion en la que existe
+  almacenada el caracter >
+  char arr[][100]-> contiene el comando separado en posiciones
+  lista *l-> donde copiaremos el comando hasta antes de '>
+
+  NOTA: esta funcion sólo considera una redicrreciones
+
+  Devuelve: posicion de >
+*/
+
+int separarRedireccion(char arr[][100],lista *l){
+  int i=0,retorno=0;
+  while(i<tamanio){
+      if(strcmp(arr[i],">")==0){
+        retorno=i;
+        break;
+      }else{
+        elemento e;
+        limpiarCadena(e.c);
+        strcpy(e.c,arr[i]);
+        InsertaAlFinal(l,e);
+      }
+      i++;
+  }
+  return retorno;
+}
+
+void castToPointer(char arr[][100],char *punteroCadena[],int n){
   int i=0;
   for(i=0;i<n;i++){
-    punteroCadena[i]=malloc(10*sizeof(char));
+    int memoria=strlen(arr[i])+1;
+    punteroCadena[i]=malloc(memoria*sizeof(char));
     strcpy(punteroCadena[i],arr[i]);
   }
 }
 
-void ejecutarComando(int n, char comando[]){
+void listaToPointer(lista *l,char *punteroCadena[]){
   int i=0;
-  char arr[n][10];
+  posicion p;
+  elemento e;
+  p=First(l);
+  for (i = 1;ValidatePosition(l,p); i++) {
+    e=Position(l,p);
+    strcpy(punteroCadena[i-1],e.c);
+    p=Following(l,p);
+  }
+}
+
+void ejecutarComando(char comando[]){
+  int i=0;
+  char arr[tamanio][100];//almacena el comando separado
   char rutaComando[50];
-  char *punteroCadena[n];
   limpiarCadena(rutaComando);
   separarParametros(comando,arr);
-  strcpy(arr[n-1],"NULL");
+  strcpy(arr[tamanio-1],"\0");
 
   //vfork(): copia el proceso, continua en la copia y
   //y cuando termina su ejecución continua el proceso principal
 
-  /*
-    Vamos a sacar la ruta del comando principal
-  */
-  //imprimirArreglo(arr,n);
-  if(!vfork()){
-    mandarRutaComandoaArchivo();
-    int execute=execl("/usr/bin/which","which",arr[0],NULL);
-	//dup2(3,1);
-	//close(3);
-    perror("\nFallo en la ejecución de exec\n");
-  }
-
-  copiarRutaEjecutable(rutaComando);
-  printf("%s\n",rutaComando );
-
-
-/*
-  if(tuberia==0 && redireccion==0){
-    copiarRutaEjecutable(rutaComando);
-    printf("Ruta comando %s\n",rutaComando);
+  //comando simple
+  if(tuberia==0 && redireccion==0 && ingreso==0){
       if(!vfork()){
-        castToPointer(arr,punteroCadena,n);
-        int i=0;
-        for(i=0;i<n;i++){
-          printf("hola\n");
-          printf("%s\n",punteroCadena[i]);
-        }
-        int execute=execv(rutaComando,punteroCadena);
+        char *punteroCadena[tamanio];
+        castToPointer(arr,punteroCadena,tamanio);
+        punteroCadena[tamanio-1]=NULL;
+        int execute=execvp(arr[0],punteroCadena);
         perror("\nFallo en la ejecución\n");
       }
+      sleep(2);
+      system("clear");
+  }else{
+        //comando simple>redireccion
+    if (tuberia==0 && redireccion==1 && ingreso==1) {
+
+      if(!vfork()){
+        lista miLista;
+        Initialize(&miLista);
+        int pos=separarRedireccion(arr,&miLista)+1;
+        char *punteroCadena[Size(&miLista)];
+        listaToPointer(&miLista,punteroCadena);
+        mandarRutaComandoaArchivo(arr[pos]);
+        int execute=execvp(arr[0],punteroCadena);
+      }
+      sleep(2);
+      system("clear");
+    }
   }
-*/
 
 }
 
 int main(){
-  char comando[30];
+  char comando[100];
   system("clear");
   limpiarCadena(comando);
   while(strcmp(comando, "exit")!=0){
     printf("\n");
     printf("mini-bash>");
-    fgets(comando,30,stdin);
+    fgets(comando,100,stdin);
     tamanio=contarParametros(comando)+2;
-    printf(" ");
-    ejecutarComando(tamanio,comando);
+    ejecutarComando(comando);
   }
   return 0;
 }
