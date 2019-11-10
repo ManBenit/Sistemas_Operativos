@@ -49,30 +49,19 @@ void limpiarCadena(char cadena[]){
   }
 }
 
-int contarParametros(char comando[]){
-  int lenght=strlen(comando);
-  int i=0,contador=0;
 
-  while(i<lenght){
-    if(comando[i]==' '){
-      contador++;
-    }
-    i++;
-  }
-  return contador;
-
-}
-
-void separarParametros(char comando[],char arr[][100]){
+void separarParametros(char comando[],lista *l){
     int lenght=strlen(comando);
     int i=0,indice=0;
     char cadena[50];
     char s[2];
+    elemento e;
     limpiarCadena(cadena);
     while(i<lenght){
       if(comando[i]==' ' || comando[i]=='\n' ){
-        limpiarCadena(arr[i]);
-        strcpy(arr[indice],cadena);
+        limpiarCadena(e.c);
+        strcpy(e.c,cadena);
+        InsertaAlFinal(l,e);
         indice++;
         limpiarCadena(cadena);
       }else{
@@ -85,9 +74,10 @@ void separarParametros(char comando[],char arr[][100]){
 
 void analizarComando(char comando[]) {
   int i=0;
-  while (i<strlen(comando)) {
+  int longitud=strlen(comando);
+  while (i<longitud) {
       if(comando[i]=='>'){
-          redireccion++;;
+          redireccion++;
       }else{
         if(comando[i]=='|'){
           tuberia++;
@@ -97,16 +87,17 @@ void analizarComando(char comando[]) {
           }
         }
       }
+      i++;
   }
 }
-void sobreescribirArchivo(){
+void sobreescribirArchivo(char archivoP[]){
   FILE *archivo;
-  archivo=fopen("resultado.txt","w+");
+  archivo=fopen(archivoP,"w+");
   fputs(" ",archivo);
   fclose(archivo);
 }
-void mandarRutaComandoaArchivo(char archivo[]){
-  sobreescribirArchivo();
+void ejecutarDub(char archivo[]){
+  sobreescribirArchivo(archivo);
   int fd=open(archivo,O_WRONLY | O_CREAT,0600);
   if(fd==-1){
     perror("\nfallo en open\n");
@@ -156,87 +147,88 @@ void copiarRutaEjecutable(char rutaComando[]){
   Devuelve: posicion de >
 */
 
-int separarRedireccion(char arr[][100],lista *l){
-  int i=0,retorno=0;
-  while(i<tamanio){
-      if(strcmp(arr[i],">")==0){
-        retorno=i;
-        break;
-      }else{
-        elemento e;
-        limpiarCadena(e.c);
-        strcpy(e.c,arr[i]);
-        InsertaAlFinal(l,e);
-      }
-      i++;
+int separarRedireccion(lista *l,lista *copia){
+  posicion p;
+  elemento e;
+  int i=0;
+  int retorno=0;
+  p=First(l);
+  for (i = 1;ValidatePosition(l,p); i++) {
+    e=Position(l,p);
+    if(strcmp(e.c,">")==0){
+      retorno=i;
+      break;
+    }else{
+      InsertaAlFinal(copia,e);
+    }
+    p=Following(l,p);
+
   }
-  return retorno;
+
+  return retorno+1;
 }
 
-void castToPointer(char arr[][100],char *punteroCadena[],int n){
-  int i=0;
-  for(i=0;i<n;i++){
-    int memoria=strlen(arr[i])+1;
-    punteroCadena[i]=malloc(memoria*sizeof(char));
-    strcpy(punteroCadena[i],arr[i]);
-  }
-}
+
 
 void listaToPointer(lista *l,char *punteroCadena[]){
-  int i=0;
+  int i=0,j=0;
+  int nElementos=Size(l)+1;
   posicion p;
   elemento e;
   p=First(l);
+
+  for (j = 0; j < nElementos; j++) {
+    punteroCadena[j]=malloc(100*sizeof(char));
+  }
+
   for (i = 1;ValidatePosition(l,p); i++) {
     e=Position(l,p);
     strcpy(punteroCadena[i-1],e.c);
     p=Following(l,p);
   }
+  punteroCadena[nElementos-1]=NULL;
 }
 
 void ejecutarComando(char comando[]){
-  int i=0;
-  char arr[tamanio][100];//almacena el comando separado
-  char rutaComando[50];
-  limpiarCadena(rutaComando);
-  separarParametros(comando,arr);
-  strcpy(arr[tamanio-1],"\0");
+  lista comandoSeparado;
+  Initialize(&comandoSeparado);
+  separarParametros(comando,&comandoSeparado);
 
   //vfork(): copia el proceso, continua en la copia y
   //y cuando termina su ejecución continua el proceso principal
-
   //comando simple
   if(tuberia==0 && redireccion==0 && ingreso==0){
       if(!vfork()){
-        char *punteroCadena[tamanio];
-        castToPointer(arr,punteroCadena,tamanio);
-        punteroCadena[tamanio-1]=NULL;
-        int execute=execvp(arr[0],punteroCadena);
+        int tamPointer=Size(&comandoSeparado)+1;
+        char *punteroCadena[tamPointer];
+        listaToPointer(&comandoSeparado,punteroCadena);
+        posicion p=First(&comandoSeparado);
+        elemento e=Position(&comandoSeparado,p);
+        int execute=execvp(e.c,punteroCadena);
         perror("\nFallo en la ejecución\n");
       }
-      sleep(2);
-      system("clear");
   }else{
         //comando simple>redireccion
-    if (tuberia==0 && redireccion==1 && ingreso==1) {
-      printf("HOLA REDICRECCION\n");
+    if (tuberia==0 && redireccion==1 && ingreso==0) {
+
       if(!vfork()){
-        lista miLista;
-        Initialize(&miLista);
-        int pos=separarRedireccion(arr,&miLista)+1;
-        int n=Size(&miLista)+1;
-        char *punteroCadena[n];
-        listaToPointer(&miLista,punteroCadena);
-        punteroCadena[n-1]=NULL;
-        printf("ARCHIVO %s\n",arr[pos-1]);
-        mandarRutaComandoaArchivo(arr[pos]);
-        int execute=execvp(arr[0],punteroCadena);
+        lista redireccionar;
+        Initialize(&redireccionar);
+        int pos =separarRedireccion(&comandoSeparado,&redireccionar);
+        int tamPointer=Size(&redireccionar)+1;
+        char *punteroCadena[tamPointer];
+        listaToPointer(&redireccionar,punteroCadena);
+        posicion v=ElementPosition(&comandoSeparado,pos);
+        elemento e= Position (&comandoSeparado, v);
+        posicion p=First(&comandoSeparado);
+        elemento e2=Position(&comandoSeparado,p);
+        ejecutarDub(e.c);
+        int execute=execvp(e2.c,punteroCadena);
       }
-      sleep(2);
-      system("clear");
+      printf("redireccion exitosa\n");
+
     }
   }
-
 }
 
 int main(){
@@ -247,8 +239,11 @@ int main(){
     printf("\n");
     printf("mini-bash>");
     fgets(comando,100,stdin);
-    tamanio=contarParametros(comando)+2;
+    analizarComando(comando);
     ejecutarComando(comando);
+    tuberia=0;
+    redireccion=0;
+    ingreso=0;
   }
   return 0;
 }
