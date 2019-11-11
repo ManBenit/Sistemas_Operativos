@@ -24,7 +24,6 @@ Salida: Ejecución de las funciones de cada comando utilizando los temas vistos 
 int redireccion=0; //0 si el comando no tiene >
 int tuberia=0; // 0 si el comano no tiene |
 int ingreso=0; // 0 si el comando no tiene <
-int tamanio=0; //cantidad de elementos del arreglo para ejecutar exec
 
 void limpiarBuffer(){
   int c;
@@ -169,6 +168,20 @@ int separarRedireccion(lista *l,lista *copia){
 }
 
 
+void separarIngreso(lista *l,lista *copia){
+  posicion p;
+  elemento e;
+  int i=0;
+  p=First(l);
+  for (i = 1;ValidatePosition(l,p); i++) {
+    e=Position(l,p);
+    if(strcmp(e.c,"<")!=0){
+      InsertaAlFinal(copia,e);
+    }
+    p=Following(l,p);
+  }
+}
+
 
 void listaToPointer(lista *l,char *punteroCadena[]){
   int i=0,j=0;
@@ -189,6 +202,27 @@ void listaToPointer(lista *l,char *punteroCadena[]){
   punteroCadena[nElementos-1]=NULL;
 }
 
+void imprimeLista( lista *l){
+  posicion p;
+  elemento e;
+  int i=0;
+
+  p=First(l);
+
+  for(i=1;ValidatePosition(l,p);i++){
+    e=Position(l,p);
+    printf("\nElemento[%d]->%s\n",i,e.c);
+    p=Following(l,p);
+  }
+}
+
+void imprimePuntero(char *Pointer[], int tamP){
+  int i=0;
+
+  for(i=0;i<tamP;i++){
+    printf("%s\n",Pointer[i]);
+  }
+}
 void ejecutarComando(char comando[]){
   lista comandoSeparado;
   Initialize(&comandoSeparado);
@@ -224,9 +258,27 @@ void ejecutarComando(char comando[]){
         elemento e2=Position(&comandoSeparado,p);
         ejecutarDub(e.c);
         int execute=execvp(e2.c,punteroCadena);
+        perror("\nFallo en la ejecución\n");
+
       }
       printf("redireccion exitosa\n");
 
+    }else{
+        if (tuberia==0 && redireccion==0 && ingreso==1) {
+            if(!vfork()){
+              lista redireccionar;
+              Initialize(&redireccionar);
+              separarIngreso(&comandoSeparado,&redireccionar);
+              int tamPointer=Size(&redireccionar)+1;
+              char *punteroCadena[tamPointer];
+              listaToPointer(&redireccionar,punteroCadena);
+              posicion p=First(&redireccionar);
+              elemento e=Position(&redireccionar,p);
+              int execute=execvp(e.c,punteroCadena);
+              perror("\nFallo en la ejecución\n");
+
+            }
+          }
     }
   }
 }
