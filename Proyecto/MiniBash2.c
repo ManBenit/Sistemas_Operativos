@@ -21,23 +21,15 @@ Salida: Ejecución de las funciones de cada comando utilizando los temas vistos 
 #include <fcntl.h>
 #include "TADListaDL.h"
 
-int redireccion=0; //0 si el comando no tiene >
-int tuberia=0; // 0 si el comano no tiene |
-int ingreso=0; // 0 si el comando no tiene <
+void ejecutarComandoTuberias(lista *comando,int nPipes);
+void ejecutarComando(char comando[]);
 
 void limpiarBuffer(){
   int c;
   while((c=getchar())!='\n' && c!=EOF);
 }
 
-void imprimirArreglo(char arr[][10],int n){
-    int i=0;
 
-    while(i<n){
-        printf("%s\n",arr[i]);
-      i++;
-    }
-}
 void limpiarCadena(char cadena[]){
   int length=strlen(cadena);
   int i=0;
@@ -71,23 +63,45 @@ void separarParametros(char comando[],lista *l){
     }
 }
 
-void analizarComando(char comando[]) {
+int contarRedireccion(char comando[]){
   int i=0;
+  int contador=0;
   int longitud=strlen(comando);
-  while (i<longitud) {
+    while (i<longitud) {
       if(comando[i]=='>'){
-          redireccion++;
-      }else{
-        if(comando[i]=='|'){
-          tuberia++;
-        }else{
-          if(comando[i]=='<'){
-            ingreso++;
-          }
-        }
+          contador++;
       }
       i++;
-  }
+    }
+    return contador;
+}
+int contarIngreso(char comando[]){
+  int i=0;
+  int contador=0;
+  int longitud=strlen(comando);
+    while (i<longitud) {
+      if(comando[i]=='<'){
+          contador++;
+      }
+      i++;
+    }
+    return contador;
+
+}
+int contarTuberia(char comando[]){
+  int i=0;
+  int contador=0;
+  int longitud=strlen(comando);
+    while (i<longitud) {
+      if(comando[i]=='|'){
+          contador++;
+      }
+      i++;
+    }
+  return contador;
+}
+void analizarComando(char comando[],int redireccion,int tuberia, int ingreso) {
+
 }
 void sobreescribirArchivo(char archivoP[]){
   FILE *archivo;
@@ -113,24 +127,6 @@ void ejecutarDub(char archivo[]){
     exit(-1);
   }
 
-}
-
-void copiarRutaEjecutable(char rutaComando[]){
-  int fd;
-  int numberBytes;
-  char c;
-  char s[2];
-  char cadena[50];
-  limpiarCadena(cadena);
-  fd=open("resultado.txt",O_RDONLY);
-  if(fd!=-1){
-      while((numberBytes=read(fd,&cadena,sizeof(char)))>0){
-        strcat(rutaComando,cadena);
-      }
-      close(fd);
-  }else{
-    printf("\nEl archivo no existe\n");
-  }
 }
 
 /*
@@ -176,7 +172,11 @@ void separarIngreso(lista *l,lista *copia){
   for (i = 1;ValidatePosition(l,p); i++) {
     e=Position(l,p);
     if(strcmp(e.c,"<")!=0){
-      InsertaAlFinal(copia,e);
+      if(strcmp(e.c,">")==0){
+        break;
+      }else{
+        InsertaAlFinal(copia,e);
+      }
     }
     p=Following(l,p);
   }
@@ -223,7 +223,83 @@ void imprimePuntero(char *Pointer[], int tamP){
     printf("%s\n",Pointer[i]);
   }
 }
+
+void ejecutarDubTuberia(){
+  sobreescribirArchivo("tuberia.txt");
+  int fd=open("tuberia.txt",O_WRONLY | O_CREAT,0600);
+  if(fd==-1){
+    perror("\nfallo en open\n");
+    exit(-1);
+  }
+  //lo mandamos a salida standar
+  if(dup2(fd,1)==-1){
+    perror("fallo en dup2");
+    exit(-1);
+  }
+
+  if(close(fd)==-1){
+    perror("fallo en close");
+    exit(-1);
+  }
+
+}
+
+void ejecutarComandoTuberias(lista *comando,int nPipes) {
+  posicion p;
+  elemento e;
+  char comand[100];
+  limpiarCadena(comand);
+  int i=0;
+  int contador=0; // la vamos a ir incrementando cada que se encuentre una pipe
+  p=First(comando);
+  for(i=1;ValidatePosition(comando,p);i++){
+    e=Position(comando,p);
+    if(strcmp(e.c,"|")==0){
+      contador++;
+      if(contador==1){
+        strcat(comand,"\n");
+        ejecutarDubTuberia();
+        ejecutarComando(comand);
+      }else{
+        if(contador==nPipes){
+
+        }else{
+            strcat(comand," > tuberias.txt");
+            ejecutarComando(comand);
+        }
+      }
+    }else{
+      strcat(comand,e.c);
+    }
+    p=Following(comando,p);
+  }
+}
+
+void listaToCommand(char cadena[],lista *l){
+  posicion p;
+  elemento e;
+  int i=0;
+
+  p=First(l);
+
+  for(i=1;ValidatePosition(l,p);i++){
+    e=Position(l,p);
+    if(i==1){
+      strcat(cadena,e.c);
+    }else{
+      strcat(cadena," ");
+      strcat(cadena,e.c);
+    }
+    p=Following(l,p);
+  }
+  strcat(cadena,"\n");
+}
+
 void ejecutarComando(char comando[]){
+  sleep(1);
+  int redireccion=contarRedireccion(comando); //0 si el comando no tiene >
+  int tuberia=contarTuberia(comando); // 0 si el comano no tiene |
+  int ingreso=contarIngreso(comando); // 0 si el comando no tiene <
   lista comandoSeparado;
   Initialize(&comandoSeparado);
   separarParametros(comando,&comandoSeparado);
@@ -265,25 +341,46 @@ void ejecutarComando(char comando[]){
 
     }else{
         if (tuberia==0 && redireccion==0 && ingreso==1) {
-            if(!vfork()){
-              lista redireccionar;
-              Initialize(&redireccionar);
-              separarIngreso(&comandoSeparado,&redireccionar);
-              int tamPointer=Size(&redireccionar)+1;
-              char *punteroCadena[tamPointer];
-              listaToPointer(&redireccionar,punteroCadena);
-              posicion p=First(&redireccionar);
-              elemento e=Position(&redireccionar,p);
-              int execute=execvp(e.c,punteroCadena);
-              perror("\nFallo en la ejecución\n");
+              if(!vfork()){
+                  lista redireccionar;
+                  Initialize(&redireccionar);
+                  separarIngreso(&comandoSeparado,&redireccionar);
+                  int tamPointer=Size(&redireccionar)+1;
+                  char *punteroCadena[tamPointer];
+                  listaToPointer(&redireccionar,punteroCadena);
+                  posicion p=First(&redireccionar);
+                  elemento e=Position(&redireccionar,p);
+                  int execute=execvp(e.c,punteroCadena);
+                  perror("\nFallo en la ejecución\n");
 
-            }
+              }
+          }else{
+              //comando < archivo > archivo
+            if (tuberia==0 && redireccion==1 && ingreso==1) {
+                  if(!vfork()){
+                      lista redireccionar;
+                      Initialize(&redireccionar);
+                      separarIngreso(&comandoSeparado,&redireccionar);
+                      posicion aux=Final(&comandoSeparado);
+                      elemento k=Position(&comandoSeparado,aux);
+                      elemento rd;
+                      limpiarCadena(rd.c);
+                      strcpy(rd.c,">");
+                      InsertaAlFinal(&redireccionar,rd);
+                      InsertaAlFinal(&redireccionar,k);
+                      char comandoNUevo[100];
+                      limpiarCadena(comandoNUevo);
+                      listaToCommand(comandoNUevo,&redireccionar);
+                      ejecutarComando(comandoNUevo);
+                  }
+              }
           }
     }
   }
 }
 
 int main(){
+
   char comando[100];
   system("clear");
   limpiarCadena(comando);
@@ -291,11 +388,7 @@ int main(){
     printf("\n");
     printf("mini-bash>");
     fgets(comando,100,stdin);
-    analizarComando(comando);
     ejecutarComando(comando);
-    tuberia=0;
-    redireccion=0;
-    ingreso=0;
   }
   return 0;
 }

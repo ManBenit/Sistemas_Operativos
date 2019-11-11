@@ -1,12 +1,1 @@
-total 84
-drwxrwxr-x 3 jamg54 jamg54  4096 nov 10 17:50 .
-drwxrwxr-x 4 jamg54 jamg54  4096 oct 24 20:00 ..
--rwxr-xr-x 1 jamg54 jamg54 23024 nov 10 17:50 eje
-drwxr-xr-x 2 jamg54 jamg54  4096 nov 10 16:52 funcionaPLox
--rw-rw-r-- 1 jamg54 jamg54   797 nov  1 18:04 mainBash.c
--rw-r--r-- 1 jamg54 jamg54  6793 nov 10 17:50 MiniBash2.c
--rw-rw-r-- 1 jamg54 jamg54    68 nov  1 13:40 prueba.c
--rw-rw-r-- 1 jamg54 jamg54     1 nov 10 17:50 pruebas.txt
--rw------- 1 jamg54 jamg54    13 nov 10 17:09 resultado.txt
--rw-r--r-- 1 jamg54 jamg54 13710 nov  7 22:06 TADListaDL.c
--rw-r--r-- 1 jamg54 jamg54  4386 nov  7 21:23 TADListaDL.h
+ 
