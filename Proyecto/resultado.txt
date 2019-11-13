@@ -1,0 +1,4 @@
+  PID TTY          TIME CMD
+ 2492 pts/0    00:00:00 eje
+ 2596 pts/0    00:00:00 eje
+ 2600 pts/0    00:00:00 ps

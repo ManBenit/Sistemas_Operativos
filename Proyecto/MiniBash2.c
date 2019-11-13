@@ -21,7 +21,7 @@ Salida: Ejecución de las funciones de cada comando utilizando los temas vistos 
 #include <fcntl.h>
 #include "TADListaDL.h"
 
-void ejecutarComandoTuberias(lista *comando,int nPipes);
+void ejecutarComandoTuberias(lista *comando);
 void ejecutarComando(char comando[]);
 
 void limpiarBuffer(){
@@ -243,8 +243,14 @@ void ejecutarDubTuberia(){
   }
 
 }
-
-void ejecutarComandoTuberias(lista *comando,int nPipes) {
+ void imprimirCad(char cad[]) {
+  int i=0;
+  while (cad[i]!='\0') {
+    printf("%c->%d\n",cad[i],cad[i]);
+    i++;
+  }
+}
+void ejecutarComandoTuberias(lista *comando) {
   posicion p;
   elemento e;
   char comand[100];
@@ -257,22 +263,28 @@ void ejecutarComandoTuberias(lista *comando,int nPipes) {
     if(strcmp(e.c,"|")==0){
       contador++;
       if(contador==1){
-        strcat(comand,"\n");
-        ejecutarDubTuberia();
+        //printf("LLEGADA A CONTADOR 1\n" );
+        strcat(comand,"> tuberia.txt\n");
+        sleep(1);
+        //imprimirCad(comand);
         ejecutarComando(comand);
       }else{
-        if(contador==nPipes){
-
-        }else{
-            strcat(comand," > tuberias.txt");
+        if(contador>1){
+            strcat(comand,"< tuberia.txt\n"); //lee el archivo
+            sleep(1);
+            ejecutarDubTuberia(); //sube al archivo
             ejecutarComando(comand);
         }
       }
+      limpiarCadena(comand);
     }else{
+      strcat(e.c," ");
       strcat(comand,e.c);
     }
     p=Following(comando,p);
   }
+    strcat(comand,"< tuberia.txt\n"); //ejecuta el comando final de la tuberia
+    ejecutarComando(comand);
 }
 
 void listaToCommand(char cadena[],lista *l){
@@ -303,7 +315,7 @@ void ejecutarComando(char comando[]){
   lista comandoSeparado;
   Initialize(&comandoSeparado);
   separarParametros(comando,&comandoSeparado);
-
+  //imprimeLista(&comandoSeparado);
   //vfork(): copia el proceso, continua en la copia y
   //y cuando termina su ejecución continua el proceso principal
   //comando simple
@@ -373,6 +385,10 @@ void ejecutarComando(char comando[]){
                       listaToCommand(comandoNUevo,&redireccionar);
                       ejecutarComando(comandoNUevo);
                   }
+              }else{
+                if (tuberia>0 && redireccion==0) {
+                    ejecutarComandoTuberias(&comandoSeparado);
+                }
               }
           }
     }
