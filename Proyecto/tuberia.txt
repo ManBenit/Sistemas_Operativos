@@ -1,11 +1,4 @@
-total 88
--rwxr-xr-x 1 jamg54 jamg54 27216 nov 12 22:01 eje
--rw-rw-r-- 1 jamg54 jamg54   797 nov  1 18:04 mainBash.c
--rw-r--r-- 1 jamg54 jamg54  9831 nov 12 21:50 MiniBash2.c
--rw-rw-r-- 1 jamg54 jamg54    68 nov  1 13:40 prueba.c
--rw-rw-r-- 1 jamg54 jamg54    17 nov 12 21:05 pruebas.txt
--rw-r--r-- 1 jamg54 jamg54    17 nov 10 21:23 resultados.txt
--rw-r--r-- 1 jamg54 jamg54   111 nov 12 21:43 resultado.txt
--rw-r--r-- 1 jamg54 jamg54 13710 nov  7 22:06 TADListaDL.c
--rw-r--r-- 1 jamg54 jamg54  4386 nov  7 21:23 TADListaDL.h
--rw-rw-r-- 1 jamg54 jamg54     1 nov 12 22:06 tuberia.txt
+  PID TTY          TIME CMD
+ 2315 pts/0    00:00:00 eje
+ 2318 pts/0    00:00:00 eje
+ 2321 pts/0    00:00:00 ps

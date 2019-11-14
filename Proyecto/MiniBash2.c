@@ -265,13 +265,13 @@ void ejecutarComandoTuberias(lista *comando) {
       if(contador==1){
         //printf("LLEGADA A CONTADOR 1\n" );
         strcat(comand,"> tuberia.txt\n");
-        sleep(1);
+        //sleep(1);
         //imprimirCad(comand);
         ejecutarComando(comand);
       }else{
         if(contador>1){
             strcat(comand,"< tuberia.txt\n"); //lee el archivo
-            sleep(1);
+            //sleep(1);
             ejecutarDubTuberia(); //sube al archivo
             ejecutarComando(comand);
         }
@@ -388,6 +388,22 @@ void ejecutarComando(char comando[]){
               }else{
                 if (tuberia>0 && redireccion==0) {
                     ejecutarComandoTuberias(&comandoSeparado);
+                }else{
+                  if (tuberia>0 && redireccion==1) {
+                    if(!vfork()){
+                      lista redireccionar;
+                      Initialize(&redireccionar);
+                      int pos =separarRedireccion(&comandoSeparado,&redireccionar);
+                      int tamPointer=Size(&redireccionar)+1;
+                      char *punteroCadena[tamPointer];
+                      listaToPointer(&redireccionar,punteroCadena);
+                      posicion v=ElementPosition(&comandoSeparado,pos);
+                      elemento e= Position (&comandoSeparado, v);
+                      ejecutarDub(e.c);
+                      ejecutarComandoTuberias(&redireccionar);
+                    }
+                    printf("redirección exitosa\n" );
+                  }
                 }
               }
           }

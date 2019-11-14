@@ -1,6 +1,7 @@
-1
-456
-53
-53
-66
-7
+redireccion exitosa
+redirección exitosa
+
+mini-bash> 2315 pts/0    00:00:00 eje
+ 2318 pts/0    00:00:00 eje
+ 2321 pts/0    00:00:00 ps
+  PID TTY          TIME CMD
