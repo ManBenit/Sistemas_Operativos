@@ -23,7 +23,8 @@ Salida: Ejecución de las funciones de cada comando utilizando los temas vistos 
 
 void ejecutarComandoTuberias(lista *comando);
 void ejecutarComando(char comando[]);
-
+int rdPipe=0;
+char txtPipe[100];
 void limpiarBuffer(){
   int c;
   while((c=getchar())!='\n' && c!=EOF);
@@ -284,6 +285,9 @@ void ejecutarComandoTuberias(lista *comando) {
     p=Following(comando,p);
   }
     strcat(comand,"< tuberia.txt\n"); //ejecuta el comando final de la tuberia
+    if(rdPipe==1){
+      ejecutarDub(txtPipe);
+    }
     ejecutarComando(comand);
 }
 
@@ -399,7 +403,8 @@ void ejecutarComando(char comando[]){
                       listaToPointer(&redireccionar,punteroCadena);
                       posicion v=ElementPosition(&comandoSeparado,pos);
                       elemento e= Position (&comandoSeparado, v);
-                      ejecutarDub(e.c);
+                      rdPipe=1;
+                      strcpy(txtPipe,e.c);
                       ejecutarComandoTuberias(&redireccionar);
                     }
                     printf("redirección exitosa\n" );
@@ -415,12 +420,15 @@ int main(){
 
   char comando[100];
   system("clear");
+  limpiarCadena(txtPipe);
   limpiarCadena(comando);
   while(strcmp(comando, "exit")!=0){
     printf("\n");
     printf("mini-bash>");
     fgets(comando,100,stdin);
     ejecutarComando(comando);
+    rdPipe=0;
+    limpiarCadena(txtPipe);
   }
   return 0;
 }
