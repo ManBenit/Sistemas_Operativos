@@ -1,12 +1,7 @@
-redireccion exitosa
+INGRESO A INGRESO=1redirección exitosa
 
-mini-bash> 1944 pts/0    00:00:00 eje
- 1947 pts/0    00:00:00 ps <defunct>
- 1951 pts/0    00:00:00 sort <defunct>
- 1953 pts/0    00:00:00 eje
- 1954 pts/0    00:00:00 eje
- 1955 pts/0    00:00:00 eje
- 1959 pts/0    00:00:00 ps
-  PID TTY          TIME CMD
+mini-bash> 1  4 24 tuberia.txt
 
+mini-bash>
+mini-bash>
 mini-bash>

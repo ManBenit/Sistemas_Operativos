@@ -24,6 +24,7 @@ Salida: Ejecución de las funciones de cada comando utilizando los temas vistos 
 void ejecutarComandoTuberias(lista *comando);
 void ejecutarComando(char comando[]);
 int rdPipe=0;
+int limpiar=0;
 char txtPipe[100];
 void limpiarBuffer(){
   int c;
@@ -267,14 +268,16 @@ void ejecutarComandoTuberias(lista *comando) {
         //printf("LLEGADA A CONTADOR 1\n" );
         strcat(comand,"> tuberia.txt\n");
         //sleep(1);
+
         //imprimirCad(comand);
         ejecutarComando(comand);
       }else{
         if(contador>1){
-            strcat(comand,"< tuberia.txt\n"); //lee el archivo
+            strcat(comand,"< tuberia.txt > tuberia2.txt\n"); //lee el archivo
             //sleep(1);
-            ejecutarDubTuberia(); //sube al archivo
-            ejecutarComando(comand);
+	imprimirCad(comand);
+		ejecutarComando(comand);
+           ejecutarComando("cp tuberia2.txt tuberia.txt\n");
         }
       }
       limpiarCadena(comand);
@@ -358,6 +361,7 @@ void ejecutarComando(char comando[]){
     }else{
         if (tuberia==0 && redireccion==0 && ingreso==1) {
               if(!vfork()){
+			printf("INGRESO A INGRESO=1");
                   lista redireccionar;
                   Initialize(&redireccionar);
                   separarIngreso(&comandoSeparado,&redireccionar);
