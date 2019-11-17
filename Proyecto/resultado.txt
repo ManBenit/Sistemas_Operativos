@@ -1,6 +1,14 @@
-1
-2
-5
-6
-7
-3
+drwxrwxr-x 2 jamg54 jamg54  4096 nov 16 22:48 .
+drwxrwxr-x 4 jamg54 jamg54  4096 oct 24 20:00 ..
+-rw-r--r-- 1 jamg54 jamg54 11045 nov 16 22:48 MiniBash2.c
+-rw-r--r-- 1 jamg54 jamg54    12 nov 16 21:55 pruebas.txt
+-rw-r--r-- 1 jamg54 jamg54 13710 nov 15 10:35 TADListaDL.c
+-rw-r--r-- 1 jamg54 jamg54     1 nov 16 21:29 basurero.txt
+-rw-r--r-- 1 jamg54 jamg54     1 nov 16 22:49 resultado.txt
+-rw-r--r-- 1 jamg54 jamg54     1 nov 16 22:49 tuberia.txt
+-rw-r--r-- 1 jamg54 jamg54    24 nov 16 21:51 tuberia2.txt
+-rw-r--r-- 1 jamg54 jamg54  4386 nov 15 10:35 TADListaDL.h
+-rw-r--r-- 1 jamg54 jamg54    68 nov 15 10:35 prueba.c
+-rw-r--r-- 1 jamg54 jamg54   797 nov 15 10:35 mainBash.c
+-rwxr-xr-x 1 jamg54 jamg54 27352 nov 16 22:48 eje
+total 100

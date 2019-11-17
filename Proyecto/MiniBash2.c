@@ -423,9 +423,13 @@ int main(){
   limpiarCadena(comando);
   printf("\n");
   printf("mini-bash>");
-  while(strcmp(comando, "exit")!=0){
+  while(1){
     int stdout_save=dup(STDOUT_FILENO);
     fgets(comando,100,stdin);
+    if (strcmp(comando,"exit\n")==0) {
+      printf("\nConsola terminada\n");
+      exit(0);
+    }
     ejecutarComando(comando);
     dup2(stdout_save,STDOUT_FILENO);
     sleep(1);
@@ -433,6 +437,7 @@ int main(){
     printf("\nmini-bash>");
     rdPipe=0;
     limpiarCadena(txtPipe);
+    limpiarCadena(comando);
   }
   return 0;
 }
