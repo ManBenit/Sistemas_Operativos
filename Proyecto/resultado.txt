@@ -1,7 +1,6 @@
-INGRESO A INGRESO=1redirección exitosa
-
-mini-bash> 1  4 24 tuberia.txt
-
-mini-bash>
-mini-bash>
-mini-bash>
+1
+2
+5
+6
+7
+3

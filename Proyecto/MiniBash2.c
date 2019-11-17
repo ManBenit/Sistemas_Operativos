@@ -13,6 +13,7 @@ Salida: Ejecución de las funciones de cada comando utilizando los temas vistos 
 */
 
 #include <stdio.h>
+#include <stdio_ext.h>
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -112,6 +113,7 @@ void sobreescribirArchivo(char archivoP[]){
   fclose(archivo);
 }
 void ejecutarDub(char archivo[]){
+  int stdout_save=dup(STDOUT_FILENO);
   sobreescribirArchivo(archivo);
   int fd=open(archivo,O_WRONLY | O_CREAT,0600);
   if(fd==-1){
@@ -128,7 +130,7 @@ void ejecutarDub(char archivo[]){
     perror("fallo en close");
     exit(-1);
   }
-
+  //sleep(1);
 }
 
 /*
@@ -243,6 +245,7 @@ void ejecutarDubTuberia(){
     perror("fallo en close");
     exit(-1);
   }
+  //sleep(1);
 
 }
  void imprimirCad(char cad[]) {
@@ -265,19 +268,14 @@ void ejecutarComandoTuberias(lista *comando) {
     if(strcmp(e.c,"|")==0){
       contador++;
       if(contador==1){
-        //printf("LLEGADA A CONTADOR 1\n" );
         strcat(comand,"> tuberia.txt\n");
-        //sleep(1);
-
-        //imprimirCad(comand);
         ejecutarComando(comand);
       }else{
         if(contador>1){
             strcat(comand,"< tuberia.txt > tuberia2.txt\n"); //lee el archivo
-            //sleep(1);
-	imprimirCad(comand);
-		ejecutarComando(comand);
-           ejecutarComando("cp tuberia2.txt tuberia.txt\n");
+	          //imprimirCad(comand);
+		        ejecutarComando(comand);
+            ejecutarComando("cp tuberia2.txt tuberia.txt\n");
         }
       }
       limpiarCadena(comand);
@@ -356,12 +354,10 @@ void ejecutarComando(char comando[]){
         perror("\nFallo en la ejecución\n");
 
       }
-      printf("redireccion exitosa\n");
 
     }else{
         if (tuberia==0 && redireccion==0 && ingreso==1) {
               if(!vfork()){
-			printf("INGRESO A INGRESO=1");
                   lista redireccionar;
                   Initialize(&redireccionar);
                   separarIngreso(&comandoSeparado,&redireccionar);
@@ -411,7 +407,6 @@ void ejecutarComando(char comando[]){
                       strcpy(txtPipe,e.c);
                       ejecutarComandoTuberias(&redireccionar);
                     }
-                    printf("redirección exitosa\n" );
                   }
                 }
               }
@@ -421,16 +416,21 @@ void ejecutarComando(char comando[]){
 }
 
 int main(){
-
+  rdPipe=0;
   char comando[100];
   system("clear");
   limpiarCadena(txtPipe);
   limpiarCadena(comando);
+  printf("\n");
+  printf("mini-bash>");
   while(strcmp(comando, "exit")!=0){
-    printf("\n");
-    printf("mini-bash>");
+    int stdout_save=dup(STDOUT_FILENO);
     fgets(comando,100,stdin);
     ejecutarComando(comando);
+    dup2(stdout_save,STDOUT_FILENO);
+    sleep(1);
+    printf("\nEjecución teminada\n");
+    printf("\nmini-bash>");
     rdPipe=0;
     limpiarCadena(txtPipe);
   }
