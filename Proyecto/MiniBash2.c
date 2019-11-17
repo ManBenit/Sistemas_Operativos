@@ -103,9 +103,7 @@ int contarTuberia(char comando[]){
     }
   return contador;
 }
-void analizarComando(char comando[],int redireccion,int tuberia, int ingreso) {
 
-}
 void sobreescribirArchivo(char archivoP[]){
   FILE *archivo;
   archivo=fopen(archivoP,"w+");
@@ -132,19 +130,6 @@ void ejecutarDub(char archivo[]){
   }
   //sleep(1);
 }
-
-/*
-  int separarRedireccion(char arr[][100],lista *l){
-
-  si arr contiene n cadenas, devuelve la posion en la que existe
-  almacenada el caracter >
-  char arr[][100]-> contiene el comando separado en posiciones
-  lista *l-> donde copiaremos el comando hasta antes de '>
-
-  NOTA: esta funcion sólo considera una redicrreciones
-
-  Devuelve: posicion de >
-*/
 
 int separarRedireccion(lista *l,lista *copia){
   posicion p;
